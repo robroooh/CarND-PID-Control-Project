@@ -34,13 +34,20 @@ int main()
 
   PID pid;
   // TODO: Initialize the pid variable.
-
+  pid = PID.Init(1.0,1.0,1.0);
+  double timestep_counter = 0.0;
+  double dp_p = 1.0;
+  double dp_i = 1.0;
+  double dp_d = 1.0;
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
     if (length && length > 2 && data[0] == '4' && data[1] == '2')
     {
+      timestep_counter += 1.0;
+
+
       auto s = hasData(std::string(data).substr(0, length));
       if (s != "") {
         auto j = json::parse(s);
@@ -51,13 +58,69 @@ int main()
           double speed = std::stod(j[1]["speed"].get<std::string>());
           double angle = std::stod(j[1]["steering_angle"].get<std::string>());
           double steer_value;
+          double best_err;
+          double err;
           /*
           * TODO: Calcuate steering value here, remember the steering value is
           * [-1, 1].
           * NOTE: Feel free to play around with the throttle and speed. Maybe use
           * another PID controller to control the speed!
           */
-          
+          pid.UpdateError(cte);
+          steer_value = pid.GetSteer();
+          best_err = pid.TotalError(timestep_counter);
+
+          // Adjust P
+          if (cte < best_err) {
+            best_err = cte;
+            dp_p *= 1.1;
+          } else {
+            pid.Kp -= 2 * dp_p;
+            err = pid.TotalError(timestep_counter);
+
+            if (err < best_err) {
+                best_err = err;
+                dp_p *= 1.1;
+            } else {
+                pid.Kp += dp_p;
+                dp_p *= 0.9;
+            }
+          }
+
+          if (cte < best_err) {
+            best_err = cte;
+            dp_i *= 1.1;
+          } else {
+            pid.Ki -= 2 * dp_i;
+            err = pid.TotalError(timestep_counter);
+
+            if (err < best_err) {
+                best_err = err;
+                dp_i *= 1.1;
+            } else {
+                pid.Ki += dp_i;
+                dp_i *= 0.9;
+            }
+          }
+
+          if (cte < best_err) {
+            best_err = cte;
+            dp_d *= 1.1;
+          } else {
+            pid.Kp -= 2 * dp_d;
+            err = pid.TotalError(timestep_counter);
+
+            if (err < best_err) {
+                best_err = err;
+                dp_d *= 1.1;
+            } else {
+                pid.Kd += dp_d;
+                dp_d *= 0.9;
+            }
+          }
+
+          std::cout << "Kp, Ki, Kd: " << pid.Kp << pid.Ki << pid.Kd << std::endl;
+         
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
 

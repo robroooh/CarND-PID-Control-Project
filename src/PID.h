@@ -40,7 +40,9 @@ public:
   /*
   * Calculate the total PID error.
   */
-  double TotalError();
+  double TotalError(double running_counter);
+
+  double Twiddle();
 };
 
 #endif /* PID_H */
