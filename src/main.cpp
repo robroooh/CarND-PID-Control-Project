@@ -39,7 +39,8 @@ int main()
 
   PID pid;
   // TODO: Initialize the pid variable.
-  pid.Init(1.0,1.0,1.0);
+  // stable values p=0.1 i=0.0 d=0.5
+  pid.Init(0.1,0.00025,0.75);
   timestep_counter = 0.0;
   dp_p = 1.0;
   dp_i = 1.0;
@@ -71,56 +72,59 @@ int main()
           */
           pid.UpdateError(cte);
           steer_value = pid.GetSteer();
-          best_err = pid.TotalError(timestep_counter);
+          steer_value = steer_value < -1.0? -1.0 : steer_value;
+          steer_value = steer_value > 1.0? 1.0 : steer_value;
 
-          // Adjust P
-          if (cte < best_err) {
-            best_err = cte;
-            dp_p *= 1.1;
-          } else {
-            pid.Kp -= 2 * dp_p;
-            err = pid.TotalError(timestep_counter);
+        //   best_err = pid.TotalError(timestep_counter);
 
-            if (err < best_err) {
-                best_err = err;
-                dp_p *= 1.1;
-            } else {
-                pid.Kp += dp_p;
-                dp_p *= 0.9;
-            }
-          }
+        //   // Adjust P
+        //   if (cte < best_err) {
+        //     best_err = cte;
+        //     dp_p *= 1.1;
+        //   } else {
+        //     pid.Kp -= 2 * dp_p;
+        //     err = pid.TotalError(timestep_counter);
 
-          if (cte < best_err) {
-            best_err = cte;
-            dp_i *= 1.1;
-          } else {
-            pid.Ki -= 2 * dp_i;
-            err = pid.TotalError(timestep_counter);
+        //     if (err < best_err) {
+        //         best_err = err;
+        //         dp_p *= 1.1;
+        //     } else {
+        //         pid.Kp += dp_p;
+        //         dp_p *= 0.9;
+        //     }
+        //   }
 
-            if (err < best_err) {
-                best_err = err;
-                dp_i *= 1.1;
-            } else {
-                pid.Ki += dp_i;
-                dp_i *= 0.9;
-            }
-          }
+        //   if (cte < best_err) {
+        //     best_err = cte;
+        //     dp_i *= 1.1;
+        //   } else {
+        //     pid.Ki -= 2 * dp_i;
+        //     err = pid.TotalError(timestep_counter);
 
-          if (cte < best_err) {
-            best_err = cte;
-            dp_d *= 1.1;
-          } else {
-            pid.Kd -= 2 * dp_d;
-            err = pid.TotalError(timestep_counter);
+        //     if (err < best_err) {
+        //         best_err = err;
+        //         dp_i *= 1.1;
+        //     } else {
+        //         pid.Ki += dp_i;
+        //         dp_i *= 0.9;
+        //     }
+        //   }
 
-            if (err < best_err) {
-                best_err = err;
-                dp_d *= 1.1;
-            } else {
-                pid.Kd += dp_d;
-                dp_d *= 0.9;
-            }
-          }
+        //   if (cte < best_err) {
+        //     best_err = cte;
+        //     dp_d *= 1.1;
+        //   } else {
+        //     pid.Kd -= 2 * dp_d;
+        //     err = pid.TotalError(timestep_counter);
+
+        //     if (err < best_err) {
+        //         best_err = err;
+        //         dp_d *= 1.1;
+        //     } else {
+        //         pid.Kd += dp_d;
+        //         dp_d *= 0.9;
+        //     }
+        //   }
 
           std::cout << "Kp, Ki, Kd: " << pid.Kp <<" "<< 
           pid.Ki<<" " << pid.Kd<<" " << std::endl;
