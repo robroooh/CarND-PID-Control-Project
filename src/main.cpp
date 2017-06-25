@@ -28,17 +28,22 @@ std::string hasData(std::string s) {
   return "";
 }
 
+double timestep_counter;
+double dp_p;
+double dp_i;
+double dp_d;
+
 int main()
 {
   uWS::Hub h;
 
   PID pid;
   // TODO: Initialize the pid variable.
-  pid = PID.Init(1.0,1.0,1.0);
-  double timestep_counter = 0.0;
-  double dp_p = 1.0;
-  double dp_i = 1.0;
-  double dp_d = 1.0;
+  pid.Init(1.0,1.0,1.0);
+  timestep_counter = 0.0;
+  dp_p = 1.0;
+  dp_i = 1.0;
+  dp_d = 1.0;
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
@@ -46,8 +51,6 @@ int main()
     if (length && length > 2 && data[0] == '4' && data[1] == '2')
     {
       timestep_counter += 1.0;
-
-
       auto s = hasData(std::string(data).substr(0, length));
       if (s != "") {
         auto j = json::parse(s);
@@ -107,7 +110,7 @@ int main()
             best_err = cte;
             dp_d *= 1.1;
           } else {
-            pid.Kp -= 2 * dp_d;
+            pid.Kd -= 2 * dp_d;
             err = pid.TotalError(timestep_counter);
 
             if (err < best_err) {
@@ -119,7 +122,8 @@ int main()
             }
           }
 
-          std::cout << "Kp, Ki, Kd: " << pid.Kp << pid.Ki << pid.Kd << std::endl;
+          std::cout << "Kp, Ki, Kd: " << pid.Kp <<" "<< 
+          pid.Ki<<" " << pid.Kd<<" " << std::endl;
          
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;

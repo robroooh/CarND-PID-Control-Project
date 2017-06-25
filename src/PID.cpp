@@ -32,7 +32,3 @@ double PID::TotalError(double running_counter) {
 double PID::GetSteer() {
     return -Kp * p_error - Kd * d_error - Ki * i_error;
 }
-
-double PID::Twiddle() {
-    return 0.0;
-}

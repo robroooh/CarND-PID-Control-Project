@@ -42,7 +42,7 @@ public:
   */
   double TotalError(double running_counter);
 
-  double Twiddle();
+  double GetSteer();
 };
 
 #endif /* PID_H */
