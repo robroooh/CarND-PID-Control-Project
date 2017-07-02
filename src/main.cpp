@@ -28,10 +28,20 @@ std::string hasData(std::string s) {
   return "";
 }
 
+// Resetting the Simulator
+void reset_simulator(uWS::WebSocket<uWS::SERVER>& ws){
+  std::string msg("42[\"reset\",{}]");
+  ws.send(msg.data(),msg.length(), uWS::OpCode::TEXT);
+}
+
 double timestep_counter;
 double dp_p;
 double dp_i;
 double dp_d;
+
+bool p_flag = false;
+bool i_flag = false;
+bool d_flag = false;
 
 int main()
 {
@@ -71,64 +81,95 @@ int main()
           * another PID controller to control the speed!
           */
           pid.UpdateError(cte);
+          best_err = pid.TotalError(timestep_counter);
+
+                      // if the car is out of track, just restart it
+            if (cte > 5.0 || c) {
+              reset_simulator(ws);
+            }
+
+          if (timestep_counter >= 150.0) {
+            // Twiddle
+
+            // if the car is out of track, just restart it
+            if (cte > 5.0) {
+              reset_simulator(ws);
+            }
+
+            if (!p_flag) {
+              pid.Kp += dp_p;
+              err = pid.TotalError(timestep_counter);
+              if (err < best_err) {
+                best_err = err;
+                dp_p *= 1.1;
+              } else {
+                pid.Kp -= 2 * dp_p;
+                p_flag = true;
+              }
+            } else {
+              if (err < best_err) {
+                best_err = err;
+                dp_p *= 1.1;
+              } else {
+                pid.Kp += dp_p;
+                dp_p *= 0.9;
+              }
+              p_flag = false;
+            }
+            
+
+            if (!i_flag) {
+              pid.Ki += dp_i;
+              err = pid.TotalError(timestep_counter);
+              if (err < best_err) {
+                best_err = err;
+                dp_i *= 1.1;
+              } else {
+                pid.Ki -= 2 * dp_i;
+                i_flag = true;
+              }
+            } else {
+              if (err < best_err) {
+                best_err = err;
+                dp_i *= 1.1;
+              } else {
+                pid.Ki += dp_i;
+                dp_i *= 0.9;
+              }
+              i_flag = false;
+            }
+            
+            if (!d_flag) {
+              pid.Kd += dp_d;
+              err = pid.TotalError(timestep_counter);
+              if (err < best_err) {
+                best_err = err;
+                dp_d *= 1.1;
+              } else {
+                pid.Kd -= 2 * dp_d;
+                d_flag = true;
+              }
+            } else {
+              if (err < best_err) {
+                best_err = err;
+                dp_d *= 1.1;
+              } else {
+                pid.Kd += dp_d;
+                dp_d *= 0.9;
+              }
+              d_flag = false;
+            }
+            timestep_counter = 0.0;
+          }
+
           steer_value = pid.GetSteer();
           steer_value = steer_value < -1.0? -1.0 : steer_value;
           steer_value = steer_value > 1.0? 1.0 : steer_value;
-
-        //   best_err = pid.TotalError(timestep_counter);
-
-        //   // Adjust P
-        //   if (cte < best_err) {
-        //     best_err = cte;
-        //     dp_p *= 1.1;
-        //   } else {
-        //     pid.Kp -= 2 * dp_p;
-        //     err = pid.TotalError(timestep_counter);
-
-        //     if (err < best_err) {
-        //         best_err = err;
-        //         dp_p *= 1.1;
-        //     } else {
-        //         pid.Kp += dp_p;
-        //         dp_p *= 0.9;
-        //     }
-        //   }
-
-        //   if (cte < best_err) {
-        //     best_err = cte;
-        //     dp_i *= 1.1;
-        //   } else {
-        //     pid.Ki -= 2 * dp_i;
-        //     err = pid.TotalError(timestep_counter);
-
-        //     if (err < best_err) {
-        //         best_err = err;
-        //         dp_i *= 1.1;
-        //     } else {
-        //         pid.Ki += dp_i;
-        //         dp_i *= 0.9;
-        //     }
-        //   }
-
-        //   if (cte < best_err) {
-        //     best_err = cte;
-        //     dp_d *= 1.1;
-        //   } else {
-        //     pid.Kd -= 2 * dp_d;
-        //     err = pid.TotalError(timestep_counter);
-
-        //     if (err < best_err) {
-        //         best_err = err;
-        //         dp_d *= 1.1;
-        //     } else {
-        //         pid.Kd += dp_d;
-        //         dp_d *= 0.9;
-        //     }
-        //   }
-
+        
           std::cout << "Kp, Ki, Kd: " << pid.Kp <<" "<< 
           pid.Ki<<" " << pid.Kd<<" " << std::endl;
-         
+          std::cout << "ts: " << timestep_counter << " BE: " << best_err << std::endl;
+
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
 
