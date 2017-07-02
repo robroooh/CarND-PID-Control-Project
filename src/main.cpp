@@ -49,7 +49,7 @@ int main()
   PID pid;
   // TODO: Initialize the pid variable.
   // stable values p=0.1 i=0.0 d=0.5
-  pid.Init(0.1,0.00025,0.75,1.0,1.0,1.0);
+  pid.Init(0.1,0.00025,0.75,0.067,0.000166667,0.5);
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
@@ -77,6 +77,8 @@ int main()
           // if the car is out of track, just restart it
           if (abs(cte) > 2.5) {
             reset_simulator(ws);
+            pid.ClearCumErrorRunningCt();
+            timestep_counter = 0.0;
           }
 
           if (timestep_counter >= 50.0) {
@@ -87,8 +89,8 @@ int main()
 
           steer_value = pid.GetSteer();
 
-          std::cout << "Kp, Ki, Kd: " << pid.Kp <<" "<< 
-          pid.Ki<<" " << pid.Kd<<" " << std::endl;
+          std::cout << "Kp, Ki, Kd, adj: " << pid.Kp <<" "<< 
+          pid.Ki<<" " << pid.Kd<<" " << pid.adjusting_variable << std::endl;
           std::cout << "ts: " << timestep_counter << " BE: " << pid.best_error << std::endl;
 
           // DEBUG

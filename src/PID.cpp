@@ -1,5 +1,6 @@
 #include "PID.h"
 #include <math.h>
+#include <iostream>
 
 using namespace std;
 
@@ -11,7 +12,7 @@ PID::PID() {}
 
 PID::~PID() {}
 
-void PID::Init(double Kp, double Ki, double Kd, double dp_p, double dp_i, double dp_k) {
+void PID::Init(double Kp, double Ki, double Kd, double dp_p, double dp_i, double dp_d) {
   this->Kp = Kp;
   this->Ki = Ki;
   this->Kd = Kd;
@@ -19,7 +20,7 @@ void PID::Init(double Kp, double Ki, double Kd, double dp_p, double dp_i, double
   this->i_error = 0.0;
   this->d_error = 0.0;
   this->cum_error = 0.0;
-  this->adjusting_variable = 0;
+  this->adjusting_variable = 1;
   this->best_error = 10000000.0;
   this->dp_p = dp_p;
   this->dp_i = dp_i;
@@ -70,6 +71,7 @@ void PID::Twiddle(double running_counter){
                 Kd -= 2*dp_d;
             }
             tweak = true;
+            std::cout << "OK LAH" << std::endl;
             return;
         }
     } else {
