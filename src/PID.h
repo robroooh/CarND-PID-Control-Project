@@ -9,6 +9,15 @@ public:
   double p_error;
   double i_error;
   double d_error;
+  
+  /*For Twiddling*/
+  double cum_error;
+  int adjusting_variable;
+  double best_error;
+  double dp_p;
+  double dp_i;
+  double dp_d;
+  bool tweak;
 
   /*
   * Coefficients
@@ -30,7 +39,7 @@ public:
   /*
   * Initialize PID.
   */
-  void Init(double Kp, double Ki, double Kd);
+  void Init(double Kp, double Ki, double Kd, double dp_p, double dp_i, double dp_k);
 
   /*
   * Update the PID error variables given cross track error.
@@ -43,6 +52,9 @@ public:
   double TotalError(double running_counter);
 
   double GetSteer();
+
+  void ClearCumErrorRunningCt();
+  void Twiddle(double running_counter);
 };
 
 #endif /* PID_H */
