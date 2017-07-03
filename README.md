@@ -6,6 +6,7 @@ Self-Driving Car Engineer Nanodegree Program
 
 
 [hyp]: ./images/hyperparameters_tuning.png
+[pid]: ./images/PID.jpg
 
 ## The effect each of the P, I, D components.
 
@@ -35,12 +36,15 @@ To sum up, we got
  - `Kd` is how to preventing goes to the line too fast
  - `Ki` is how fast the car should react when changes occur
 
+
+![PID-Controller][pid]
+
 but why don't we call it PDI control anyway
 
 ## How the final hyperparameters were chosen.
 
 At first, I randomly changed the hyperparameters by sense, and I realize it's harder than I thought, so I went to the forum to find some technique on the initialized value of these 3. I come acrossed [this thread](https://robotics.stackexchange.com/questions/167/what-are-good-strategies-for-tuning-pid-loops/174#174) (which is the same one as my mentor sent me). The strategies are the following 
-![hyp-tuning][hyp]
+![hyperparameters-tuning][hyp]
 
 I followed the instructions here and it works great! However, it is not perfect and oscillate a bit.
 I also play with twiddling, but it still has bugs and i'm running out of time, so i guess my initial values are just-pass for the submission. 
@@ -72,10 +76,13 @@ There's an experimental patch for windows in this [PR](https://github.com/udacit
 
 ## Basic Build Instructions
 
-1. Clone this repo.
-2. Make a build directory: `mkdir build && cd build`
-3. Compile: `cmake .. && make`
-4. Run it: `./pid`. 
+1. You can just use `./bc.sh` for the sake of easiness
+
+1. ~~Clone this repo.~~
+2. ~~Make a build directory: `mkdir build && cd build`~~
+3. ~~Compile: `cmake .. && make`~~
+4. ~~Run it: `./pid`.~~
+
 
 ## Editor Settings
 
