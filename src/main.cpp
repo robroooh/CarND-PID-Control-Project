@@ -35,13 +35,6 @@ void reset_simulator(uWS::WebSocket<uWS::SERVER>& ws){
 }
 
 double timestep_counter;
-double dp_p;
-double dp_i;
-double dp_d;
-
-bool p_flag = false;
-bool i_flag = false;
-bool d_flag = false;
 
 int main()
 {
@@ -49,7 +42,7 @@ int main()
   PID pid;
   // TODO: Initialize the pid variable.
   // stable values p=0.1 i=0.0 d=0.5
-  pid.Init(0.1,0.00025,0.75,0.067,0.000166667,0.5);
+  pid.Init(0.1,0.00125,0.45,0.2,0.2,0.2);
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
@@ -81,16 +74,18 @@ int main()
             timestep_counter = 0.0;
           }
 
-          if (timestep_counter >= 50.0) {
+          /* For Twiddling
+          if (timestep_counter >= 200.0) {
             pid.Twiddle(timestep_counter);
             pid.ClearCumErrorRunningCt();
             timestep_counter = 0.0;
           }
+          */
 
           steer_value = pid.GetSteer();
 
-          std::cout << "Kp, Ki, Kd, adj: " << pid.Kp <<" "<< 
-          pid.Ki<<" " << pid.Kd<<" " << pid.adjusting_variable << std::endl;
+          std::cout << "Kp, Ki, Kd: " << pid.Kp <<" "<< 
+          pid.Ki<<" " << pid.Kd<<" " << std::endl;
           std::cout << "ts: " << timestep_counter << " BE: " << pid.best_error << std::endl;
 
           // DEBUG
