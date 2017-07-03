@@ -3,6 +3,48 @@ Self-Driving Car Engineer Nanodegree Program
 
 ---
 
+
+
+[hyp]: ./images/hyperparameters_tuning.png
+
+## The effect each of the P, I, D components.
+
+### The P is for proportional Control
+How large or small the wheel need to turn in order to get on the trajectory line by getting the cross track error`(CTE)` multiply by the propotional gain `steering angle = Kp*cte`. However, this can leads to overshooting, where the car gets over the line too much which cause oscillating.
+
+
+### The D is the derivative(time) Control
+How fast we are moving to the trajectory line which can be found be taking the derivative term of the cte which we can roughly get `steering angle = Kd*(cte(t)-cte(t-1))` where `Kd` is the derivative gain.
+
+### PD Control
+`steering angle = Kp*cte + Kd*(cte(t)-cte(t-1))`
+
+Now we got PD control, simply exmplained as `Kp` determined how fast we should move close to the line and `Kd` control to prevent the car goes too quickly to the line. That is, if the `Kd` is too low, the car will oscilate as usual, if the `Kd` is too high, the car will just take toooo long to get to the line.
+
+However, the problem can persist on conditions where the faulty occurs in the car like the steering is unbalanced or face an obstacle which alters the angel of the car. 
+
+### The I is the Integral Control
+To take whose conditions to mind, we can add an ingetral term which is the sum of all `cte` multiply by integral gain determines how far we are from the line in overall which make a car adapts to changes.
+
+To sum up, we got
+
+### PID Control
+`steering angle = Kp*cte + Kd*(cte(t)-cte(t-1)) + Ki*sum(cte)`
+
+ - `Kp` is how fast we should go to the line
+ - `Kd` is how to preventing goes to the line too fast
+ - `Ki` is how fast the car should react when changes occur
+
+but why don't we call it PDI control anyway
+
+## How the final hyperparameters were chosen.
+
+At first, I randomly changed the hyperparameters by sense, and I realize it's harder than I thought, so I went to the forum to find some technique on the initialized value of these 3. I come acrossed [this thread](https://robotics.stackexchange.com/questions/167/what-are-good-strategies-for-tuning-pid-loops/174#174) (which is the same one as my mentor sent me). The strategies are the following 
+![hyp-tuning][hyp]
+
+I followed the instructions here and it works great! However, it is not perfect and oscillate a bit.
+I also play with twiddling, but it still has bugs and i'm running out of time, so i guess my initial values are just-pass for the submission. 
+
 ## Dependencies
 
 * cmake >= 3.5
